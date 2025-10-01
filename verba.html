@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Procvičování češtiny</title>
+  <style>
+    body {
+      background-color: #e9f5f2;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px;
+    }
+
+    .container {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 30px;
+      width: 80%;
+      justify-content: center;
+    }
+
+    .box {
+      flex: 1;
+      height: 120px;
+      background-color: #fff0f5;
+      border: 5px solid #c2d6d6;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+      transition: transform 0.3s ease-in-out;
+      font-size: 10vw;
+      line-height: 1.2;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .spin {
+      animation: spinEffect 0.3s ease-in-out;
+    }
+
+    @keyframes spinEffect {
+      0% { transform: rotateX(0deg); opacity: 1; }
+      50% { transform: rotateX(90deg); opacity: 0; }
+      100% { transform: rotateX(0deg); opacity: 1; }
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      background-color: #a1c4fd;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    button:hover {
+      background-color: #8fbbe9;
+    }
+
+    @media (min-width: 600px) {
+      .box {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="leftBox" class="box"></div>
+    <div id="rightBox" class="box"></div>
+  </div>
+  <button onclick="next()">Další</button>
+
+  <script>
+    const pronouns = ["já", "ty", "on", "ona", "my", "vy", "oni"];
+    const phrases = [
+      "být v práci", "chtít poslat balík", "spát ve stanu", "mít se dobře", "dělat si legraci",
+      "znát Prahu", "poslouchat rádio", "říkat šéfovi Pepo", "dívat se na televizi", "hledat práci",
+      "odpočívat celý víkend", "snídat v práci", "obědvat v restauraci", "vstávat brzy", "jíst zeleninu",
+      "slyšet hrom", "mluvit hlasitě", "vařit rajskou", "učit se vařit", "rozumět všemu",
+      "vědět, kde je Brno", "umět hrát volejbal", "muset přinést omluvenku", "myslet na svatbu", "bydlet na sídlišti",
+      "uklízet každou sobotu", "vidět pavouka", "smět řídit náklaďák", "večeřet doma", "pít minerálku",
+      "jít do hospody", "jet k moři", "plavat v moři", "číst knížku", "psát dopis",
+      "hrát volejbal", "pracovat ve firmě", "telefonovat přes Viber", "tancovat valčík", "nakupovat v Bille",
+      "brát antibiotika", "zvát známé na návštěvu", "moct platit kartou", "vést důležité rozhovory", "nést následky",
+      "vypnout motor", "usnout rychle", "říct důležitou věc", "rozhodnout o vítězi", "dostat víc peněz",
+      "ukázat nový počítač", "otevřít ústa"
+    ];
+
+    let pronounIndex = Math.floor(Math.random() * pronouns.length);
+    let phraseIndex = Math.floor(Math.random() * phrases.length);
+
+    function showCurrent() {
+      document.getElementById("leftBox").textContent = pronouns[pronounIndex];
+      document.getElementById("rightBox").textContent = phrases[phraseIndex];
+    }
+
+    function next() {
+      const left = document.getElementById("leftBox");
+      const right = document.getElementById("rightBox");
+
+      left.classList.add("spin");
+      right.classList.add("spin");
+
+      setTimeout(() => {
+        pronounIndex = (pronounIndex + 1) % pronouns.length;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        showCurrent();
+        left.classList.remove("spin");
+        right.classList.remove("spin");
+      }, 300);
+    }
+
+    showCurrent();
+  </script>
+</body>
+</html>

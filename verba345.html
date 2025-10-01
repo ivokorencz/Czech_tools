@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<title>Procvičování češtiny</title>
+<style>
+  html, body {
+    margin:0; padding:0; height:100%;
+    font-family: sans-serif;
+    background-color: #e9f5f2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .top-buttons {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .top-buttons button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    background-color: #a1c4fd;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 10vw;
+    transition: min-width 0.3s;
+  }
+  .top-buttons button:hover {
+    background-color: #8fbbe9;
+  }
+
+  .main-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    max-width: 100vw;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px; /* 40px sníženo o 30% */
+    width: 100%;
+    max-width: 90vw;
+  }
+  #rightBox, #leftBox {
+    background-color: #fff0f5;
+    border: 10px solid #c2d6d6;
+    border-radius: 15px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 40px;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+  #rightBox {
+    max-width: 80vw;
+    margin-bottom: 0.5em;
+  }
+  #leftBox {
+    width: 22.5vw; /* polovina původní šířky */
+    background-color: #f0f8ff;
+  }
+
+  .spin {
+    animation: spinEffect 0.3s ease-in-out;
+  }
+  @keyframes spinEffect {
+    0% { transform: rotateX(0deg); opacity: 1; }
+    50% { transform: rotateX(90deg); opacity: 0; }
+    100% { transform: rotateX(0deg); opacity: 1; }
+  }
+
+  .button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 30px;
+  }
+  .button-container button {
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    background-color: #a1c4fd;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 10vw;
+    transition: min-width 0.3s;
+  }
+  .button-container button:hover {
+    background-color: #8fbbe9;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-buttons">
+  <button id="btnMin">min</button>
+  <button id="btnMax">max</button>
+</div>
+
+<div class="main-area">
+  <div class="container">
+    <div id="rightBox"></div>
+    <div id="leftBox"></div>
+  </div>
+  <div class="button-container">
+    <button id="btnNext">Další</button>
+  </div>
+</div>
+
+<script>
+  const pronouns = ["já", "ty", "on", "ona", "my", "vy", "oni"];
+  const phrases = [
+    "být v práci", "mít se dobře", "spát dlouho", "dělat problémy",
+    "znát Prahu", "poslouchat rádio", "říkat hlouposti", "dívat se na televizi", "hledat práci",
+    "odpočívat celý víkend", "snídat v práci", "obědvat v restauraci", "vstávat brzy",
+    "slyšet hrom", "mluvit pomalu", "vařit polévku", "učit se vařit", "rozumět všemu", "umět hrát fotbal", "myslet na víkend", "bydlet v bytě",
+    "uklízet každou sobotu", "vidět pavouka", "večeřet doma", "pracovat ve firmě", "telefonovat přes Viber",
+    "tancovat tango", "nakupovat v Bille"
+  ];
+
+  const phrases_short = [
+    "být v práci", "mít se dobře", "dělat problémy", "rozumět všemu", "pracovat ve firmě"
+  ];
+
+  let currentPhrases = phrases;
+
+  // Pseudonáhodný start:
+  let pronounIndex = Math.floor(Math.random() * pronouns.length);
+  let phraseIndex = Math.floor(Math.random() * currentPhrases.length);
+
+  const leftBox = document.getElementById("leftBox");
+  const rightBox = document.getElementById("rightBox");
+  const btnMin = document.getElementById("btnMin");
+  const btnMax = document.getElementById("btnMax");
+  const btnNext = document.getElementById("btnNext");
+
+  function showCurrent() {
+    leftBox.textContent = pronouns[pronounIndex];
+    rightBox.textContent = currentPhrases[phraseIndex];
+  }
+
+  function calcFontSize() {
+    let longestPhrase = currentPhrases.reduce((a,b) => a.length > b.length ? a : b, "");
+    const maxWidthPx = window.innerWidth * 0.7;
+
+    const span = document.createElement("span");
+    span.style.position = "absolute";
+    span.style.visibility = "hidden";
+    span.style.whiteSpace = "nowrap";
+    span.style.fontWeight = "bold";
+    document.body.appendChild(span);
+
+    let fontSize = 10;
+    span.style.fontSize = fontSize + "px";
+    span.textContent = longestPhrase;
+
+    while(span.offsetWidth < maxWidthPx && fontSize < 500) {
+      fontSize += 1;
+      span.style.fontSize = fontSize + "px";
+    }
+    if(span.offsetWidth > maxWidthPx) fontSize -= 1;
+
+    document.body.removeChild(span);
+    return fontSize;
+  }
+
+  function applySizes() {
+    const fontSizePx = calcFontSize();
+
+    leftBox.style.fontSize = fontSizePx + "px";
+    rightBox.style.fontSize = fontSizePx + "px";
+
+    const lineHeight = 1.2;
+    let heightPx = fontSizePx * lineHeight * 1.2;
+
+    heightPx = heightPx * 0.7; // zmenšení výšky o 30%
+
+    leftBox.style.height = heightPx + "px";
+    rightBox.style.height = heightPx + "px";
+
+    rightBox.style.maxWidth = "80vw";
+    leftBox.style.width = "22.5vw";
+
+    btnMin.style.minWidth = "10vw";
+    btnMax.style.minWidth = "10vw";
+    btnNext.style.minWidth = "10vw";
+  }
+
+  function next() {
+    leftBox.classList.add("spin");
+    rightBox.classList.add("spin");
+
+    setTimeout(() => {
+      pronounIndex = (pronounIndex + 1) % pronouns.length;
+      phraseIndex = (phraseIndex + 1) % currentPhrases.length;
+      showCurrent();
+      leftBox.classList.remove("spin");
+      rightBox.classList.remove("spin");
+    }, 300);
+  }
+
+  btnMin.addEventListener("click", () => {
+    currentPhrases = phrases_short;
+    phraseIndex = 0;
+    pronounIndex = 0;
+    showCurrent();
+    applySizes();
+  });
+
+  btnMax.addEventListener("click", () => {
+    currentPhrases = phrases;
+    phraseIndex = 0;
+    pronounIndex = 0;
+    showCurrent();
+    applySizes();
+  });
+
+  btnNext.addEventListener("click", next);
+
+  window.addEventListener("resize", () => {
+    applySizes();
+  });
+
+  showCurrent();
+  applySizes();
+</script>
+</body>
+</html>
