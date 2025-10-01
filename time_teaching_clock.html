@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Výuka časových údajů (clock.0.1)</title>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .sidebar {
+      width: 150px;
+      padding: 10px;
+      box-sizing: border-box;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    canvas, .digital {
+      max-width: 60vw;
+      max-height: 60vh;
+    }
+    .digital {
+      font-size: 8vw;
+      display: none;
+      border: 5px solid black;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    .active {
+      background-color: #999;
+    }
+    .inactive {
+      background-color: #e0e0e0;
+    }
+    .control-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+    .control-buttons button {
+      flex: 1;
+      max-width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <button id="toggleView">digital</button>
+    <button id="btn60" onclick="setRounding(60)">60 min</button>
+    <button id="btn30" onclick="setRounding(30)">30 min</button>
+    <button id="btn15" onclick="setRounding(15)">15 min</button>
+    <button id="btn5" onclick="setRounding(5)">5 min</button>
+    <button id="btn1" onclick="setRounding(1)">1 min</button>
+  </div>
+  <div class="main">
+    <div style="display: flex; flex-direction: column; align-items: center;">
+      <canvas id="analogClock" width="400" height="400"></canvas>
+      <div id="digitalClock" class="digital"></div>
+    </div>
+    <div class="control-buttons">
+      <button onclick="setTimeToMidnight()">00:00</button>
+      <button onclick="addMinutes()">+</button>
+      <button onclick="generateTime()">Random</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('analogClock');
+    const ctx = canvas.getContext('2d');
+    const digital = document.getElementById('digitalClock');
+    const toggleViewBtn = document.getElementById('toggleView');
+    const buttons = {
+      60: document.getElementById('btn60'),
+      30: document.getElementById('btn30'),
+      15: document.getElementById('btn15'),
+      5: document.getElementById('btn5'),
+      1: document.getElementById('btn1')
+    };
+
+    let isAnalog = true;
+    let rounding = 60;
+    let currentHour = 0;
+    let currentMinute = 0;
+    let previousTimes = [];
+
+    function setRounding(minutes) {
+      rounding = minutes;
+      for (let key in buttons) {
+        buttons[key].classList.remove('active', 'inactive');
+        buttons[key].classList.add(parseInt(key) === rounding ? 'active' : 'inactive');
+      }
+    }
+
+    toggleViewBtn.addEventListener('click', () => {
+      isAnalog = !isAnalog;
+      toggleViewBtn.textContent = isAnalog ? 'digital' : 'analog';
+      showTime(currentHour, currentMinute);
+    });
+
+    function generateTime() {
+      let totalMinutes;
+      let attempt = 0;
+      do {
+        totalMinutes = Math.round(Math.random() * (24 * 60) / rounding) * rounding;
+        attempt++;
+      } while (previousTimes.includes(totalMinutes) && attempt < 10);
+
+      previousTimes.unshift(totalMinutes);
+      if (previousTimes.length > 3) previousTimes.pop();
+
+      const hours = Math.floor(totalMinutes / 60) % 24;
+      const minutes = totalMinutes % 60;
+      currentHour = hours;
+      currentMinute = minutes;
+      showTime(hours, minutes);
+    }
+
+    function setTimeToMidnight() {
+      currentHour = 0;
+      currentMinute = 0;
+      showTime(currentHour, currentMinute);
+    }
+
+    function addMinutes() {
+      let totalMinutes = currentHour * 60 + currentMinute;
+      totalMinutes += rounding;
+      totalMinutes %= 24 * 60;
+      currentHour = Math.floor(totalMinutes / 60);
+      currentMinute = totalMinutes % 60;
+      showTime(currentHour, currentMinute);
+    }
+
+    function showTime(h, m) {
+      if (isAnalog) {
+        canvas.style.display = 'block';
+        digital.style.display = 'none';
+        drawAnalogClock(h, m);
+      } else {
+        canvas.style.display = 'none';
+        digital.style.display = 'block';
+        digital.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      }
+    }
+
+    function drawAnalogClock(h, m) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 10;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Minute and hour ticks
+      for (let i = 0; i < 60; i++) {
+        let angle = (i * Math.PI) / 30;
+        let inner = i % 5 === 0 ? radius - 15 : radius - 8;
+        let outer = radius;
+        ctx.beginPath();
+        ctx.moveTo(centerX + Math.sin(angle) * inner, centerY - Math.cos(angle) * inner);
+        ctx.lineTo(centerX + Math.sin(angle) * outer, centerY - Math.cos(angle) * outer);
+        ctx.lineWidth = i % 5 === 0 ? 3 : 1;
+        ctx.stroke();
+      }
+
+      ctx.font = '39px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let num = 1; num <= 12; num++) {
+        let angle = (num * Math.PI) / 6;
+        let x = centerX + Math.sin(angle) * (radius - 45);
+        let y = centerY - Math.cos(angle) * (radius - 45);
+        ctx.fillText(num, x, y);
+      }
+
+      const hourAngle = ((h % 12) + m / 60) * (Math.PI / 6);
+      const minuteAngle = m * (Math.PI / 30);
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX + Math.sin(hourAngle) * (radius * 0.6),
+        centerY - Math.cos(hourAngle) * (radius * 0.6)
+      );
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX + Math.sin(minuteAngle) * (radius * 0.9),
+        centerY - Math.cos(minuteAngle) * (radius * 0.9)
+      );
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    setRounding(rounding);
+    generateTime();
+  </script>
+</body>
+</html>
